@@ -3,46 +3,40 @@ package com.unitbvcv.btcarremote
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
 import android.util.AttributeSet
-import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import kotlin.math.min
 
-class MainView(context: Context, attrs: AttributeSet) : View(context, attrs) {
+class MainView(context: Context, attrs: AttributeSet) : View(context, attrs), View.OnTouchListener {
 
-    /* Property */
-//    var exampleString: String?
-//        get() = _exampleString
-//        set(value) {
-//            _exampleString = value
-//            invalidateTextPaintAndMeasurements()
-//        }
+    private val backCircle: Circle = Circle(0f, 0f, 200f).apply {
+        painter.color = Color.GRAY
+    }
+
+    private val frontCircle: Circle = Circle(0f, 0f, 100f).apply {
+        painter.color = Color.RED
+    }
+
+    private val maxRadius: Float = 450f
 
     init {
         setWillNotDraw(false)
+        setOnTouchListener(this)
     }
-
-    private val _painter: Paint = Paint()
-
-    private var centerX: Float = 0f
-    private var centerY: Float = 0f
-    private val maxRadius: Float = 400f
-    private var backCircleRadius: Float = 200f
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
-        centerX = w.toFloat() / 2
-        centerY = h.toFloat() / 2
+        backCircle.centerX = w.toFloat() / 2
+        backCircle.centerY = h.toFloat() / 2
 
         val minSide = min(w.toFloat(), h.toFloat())
-        backCircleRadius = if (minSide / 2 < maxRadius) minSide / 2 else maxRadius
+        backCircle.radius = if (minSide / 2 < maxRadius) minSide / 2 else maxRadius
 
-        for (i in 1..100){
-            Log.i("Test: minSide = ", minSide.toString())
-            Log.i("Test: backCircleRad = ", backCircleRadius.toString())
-        }
+        frontCircle.centerX = backCircle.centerX
+        frontCircle.centerY = backCircle.centerY
+        frontCircle.radius = backCircle.radius / 2.5f
 
         invalidate()
     }
@@ -50,9 +44,24 @@ class MainView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        canvas.drawCircle(centerX, centerY, backCircleRadius, _painter.apply {
-            color = Color.GRAY
-        })
+        backCircle.draw(canvas)
+        frontCircle.draw(canvas)
+    }
+
+    override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+        when (event?.action) {
+            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                frontCircle.centerX = event.x
+                frontCircle.centerY = event.y
+            }
+            MotionEvent.ACTION_UP -> {
+                frontCircle.centerX = backCircle.centerX
+                frontCircle.centerY = backCircle.centerY
+            }
+            else -> return false // does it matter?
+        }
+        invalidate()
+        return true
     }
 
 }
