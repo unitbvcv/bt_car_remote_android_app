@@ -41,6 +41,11 @@ class MainActivity : AppCompatActivity() {
         // Handle item selection
         return when (item.itemId) {
             R.id.connectAction -> {
+                ConnectDialog(this).show()
+                true
+            }
+            R.id.bluetoothSettingsAction -> {
+                BTSettingsDialog(this).show()
                 true
             }
             R.id.aboutAction -> {
