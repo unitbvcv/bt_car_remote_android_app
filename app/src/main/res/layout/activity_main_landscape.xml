@@ -66,7 +66,7 @@
     />
 
     <com.unitbvcv.btcarremote.JoystickView
-            android:id="@+id/mainView"
+            android:id="@+id/joystickView"
             android:layout_height="0dp"
             android:layout_width="0dp"
             android:layout_marginTop="8dp"
@@ -84,7 +84,7 @@
     />
 
     <fragment
-            android:id="@+id/fragment"
+            android:id="@+id/fragmentButtons"
             android:name="com.unitbvcv.btcarremote.ButtonsFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
