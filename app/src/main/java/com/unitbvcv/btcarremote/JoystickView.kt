@@ -6,10 +6,10 @@ import android.graphics.Color
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import kotlin.math.max
+import android.widget.TextView
 import kotlin.math.min
 
-class MainView(context: Context, attrs: AttributeSet) : View(context, attrs), View.OnTouchListener {
+class JoystickView(context: Context, attrs: AttributeSet) : View(context, attrs), View.OnTouchListener {
 
     private val backCircle: Circle = Circle(0f, 0f, 200f).apply {
         painter.color = Color.GRAY
@@ -80,8 +80,31 @@ class MainView(context: Context, attrs: AttributeSet) : View(context, attrs), Vi
             }
             else -> return false // does it matter?
         }
+
+        setVisualCoordinates()
         invalidate()
         return true
+    }
+
+    private fun setVisualCoordinates() {
+        val maxPermittedDistance = backCircle.radius - frontCircle.radius
+        val coord = rootView.findViewById<TextView>(R.id.textViewTouchCoord)
+        if (coord != null) {
+            val circlesDistancePercentage = Math.round(Math.hypot(
+                (frontCircle.centerX - backCircle.centerX).toDouble(),
+                (frontCircle.centerY - backCircle.centerY).toDouble()
+            ) / maxPermittedDistance * 100)
+            var slopeAngle = Math.atan2(
+                -(frontCircle.centerY - backCircle.centerY).toDouble(),
+                (frontCircle.centerX - backCircle.centerX).toDouble()
+            )
+            if (slopeAngle < 0)
+                slopeAngle += 2 * Math.PI
+            slopeAngle = Math.toDegrees(slopeAngle)
+
+            // this data should be sent through bluetooth
+            coord.text = "(${circlesDistancePercentage.toInt()}, ${slopeAngle.toInt()})"
+        }
     }
 
 }

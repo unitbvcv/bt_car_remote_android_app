@@ -65,7 +65,7 @@
             app:layout_constraintBottom_toTopOf="@+id/guidelinehoriz15"
     />
 
-    <com.unitbvcv.btcarremote.MainView
+    <com.unitbvcv.btcarremote.JoystickView
             android:id="@+id/mainView"
             android:layout_height="0dp"
             android:layout_width="0dp"
