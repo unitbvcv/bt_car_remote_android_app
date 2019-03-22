@@ -3,6 +3,9 @@ package com.unitbvcv.btcarremote
 import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.app.DialogFragment
+import android.view.Menu
+import android.view.MenuItem
 import android.view.Surface
 import android.view.WindowManager
 
@@ -29,8 +32,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu, menu)
+        return true
     }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+        return when (item.itemId) {
+            R.id.connectAction -> {
+                true
+            }
+            R.id.aboutAction -> {
+                AboutDialog(this).show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
 }

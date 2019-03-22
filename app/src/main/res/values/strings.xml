@@ -6,4 +6,6 @@
     <string name="settings">settings</string>
     <string name="not_connected">Not Connected</string>
     <string name="connected">Connected</string>
+    <string name="connect_to_device">Connect to device</string>
+    <string name="about">About</string>
 </resources>
