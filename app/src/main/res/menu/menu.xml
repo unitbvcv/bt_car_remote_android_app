@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/threeDots"
+          android:title=""
+          android:orderInCategory="101"
+          app:showAsAction="always"
+          android:icon="@drawable/ic_more_vert_black_24dp">
+
+        <menu>
+
+            <item android:id="@+id/connectAction"
+                  android:title="@string/connect_to_device"
+                  app:showAsAction="ifRoom"
+            />
+
+            <item android:id="@+id/bluetoothSettingsAction"
+                  android:title="@string/bluetooth_settings"
+                  app:showAsAction="ifRoom"
+            />
+
+            <item android:id="@+id/aboutAction"
+                  android:title="@string/about"
+                  app:showAsAction="ifRoom"
+            />
+
+        </menu>
+
+    </item>
+
+</menu>
