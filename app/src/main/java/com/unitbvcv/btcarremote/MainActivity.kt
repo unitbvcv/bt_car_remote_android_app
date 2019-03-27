@@ -1,9 +1,9 @@
 package com.unitbvcv.btcarremote
 
 import android.content.Context
-import android.support.v7.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
+import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.Surface
@@ -38,20 +38,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle item selection
         return when (item.itemId) {
-            R.id.connectAction -> {
-                ConnectDialog(this).show()
+            R.id.settingsItem -> {
+                val intent = Intent(this, Settings::class.java).apply {
+                    // putExtra(EXTRA_MESSAGE, message)
+                }
+                startActivity(intent)
                 true
             }
-            R.id.bluetoothSettingsAction -> {
-                BTSettingsDialog(this).show()
-                true
-            }
-            R.id.aboutAction -> {
-                AboutDialog(this).show()
-                true
-            }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
