@@ -1,8 +1,9 @@
 package com.unitbvcv.btcarremote
 
+import android.app.Activity
 import android.app.AlertDialog
 
-class AboutDialog(activity: MainActivity) {
+class AboutDialog(activity: Activity) {
 
     private val builder: AlertDialog.Builder = activity.let { AlertDialog.Builder(it) }.apply {
         setTitle("About BT Car Controller")

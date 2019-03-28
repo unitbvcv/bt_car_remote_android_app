@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.settingsItem -> {
-                val intent = Intent(this, Settings::class.java).apply {
+                val intent = Intent(this, SettingsActivity::class.java).apply {
                     // putExtra(EXTRA_MESSAGE, message)
                 }
                 startActivity(intent)
