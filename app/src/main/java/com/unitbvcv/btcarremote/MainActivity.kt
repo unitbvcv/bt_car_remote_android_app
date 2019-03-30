@@ -1,19 +1,32 @@
 package com.unitbvcv.btcarremote
 
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.view.Menu
-import android.view.MenuItem
-import android.view.Surface
-import android.view.WindowManager
+import android.view.*
+import android.widget.TextView
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var bluetoothViewModel: BluetoothViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         loadLayout(getScreenOrientation())
+
+        bluetoothViewModel = ViewModelProviders.of(this).get(BluetoothViewModel::class.java)
+        val joystickView = findViewById<JoystickView>(R.id.joystickView)
+        joystickView.joystickData.observe(this, bluetoothViewModel.joystickObserver)
+        joystickView.joystickData.observe(this, Observer { joystickPair: Pair<Double, Double>? ->
+            if (joystickPair != null) {
+                findViewById<TextView>(R.id.textViewTouchCoord)?.text =
+                    "(${joystickPair.first.toInt()}, ${joystickPair.second.toInt()})"
+            }
+        })
+
     }
 
     private fun getScreenOrientation() : Int {

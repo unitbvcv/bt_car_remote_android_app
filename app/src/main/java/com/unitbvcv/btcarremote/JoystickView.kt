@@ -1,15 +1,15 @@
 package com.unitbvcv.btcarremote
 
+import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.widget.TextView
 import kotlin.math.min
 
-class JoystickView(context: Context, attrs: AttributeSet) : View(context, attrs), View.OnTouchListener {
+class JoystickView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private val backCircle: Circle = Circle(0f, 0f, 200f).apply {
         painter.color = Color.GRAY
@@ -21,9 +21,15 @@ class JoystickView(context: Context, attrs: AttributeSet) : View(context, attrs)
 
     private val maxRadius: Float = 450f
 
+    private var circlesDistancePercentage: Double = 0.0
+    private var slopeAngle: Double = 0.0
+
+    val joystickData: MutableLiveData<Pair<Double, Double>> = MutableLiveData<Pair<Double, Double>>().also {
+        it.value = Pair<Double, Double>(circlesDistancePercentage, slopeAngle)
+    }
+
     init {
         setWillNotDraw(false)
-        setOnTouchListener(this)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -49,7 +55,13 @@ class JoystickView(context: Context, attrs: AttributeSet) : View(context, attrs)
         frontCircle.draw(canvas)
     }
 
-    override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        val result = onTouchImpl(event)
+        joystickData.value = Pair(circlesDistancePercentage, slopeAngle)
+        return result
+    }
+
+    private fun onTouchImpl(event: MotionEvent?): Boolean {
         val maxPermittedDistance = backCircle.radius - frontCircle.radius
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -81,30 +93,26 @@ class JoystickView(context: Context, attrs: AttributeSet) : View(context, attrs)
             else -> return false // does it matter?
         }
 
-        setVisualCoordinates()
+        updateCircleCentersRelativePolarCoordinates()
         invalidate()
         return true
     }
 
-    private fun setVisualCoordinates() {
+    private fun updateCircleCentersRelativePolarCoordinates() {
         val maxPermittedDistance = backCircle.radius - frontCircle.radius
-        val coord = rootView.findViewById<TextView>(R.id.textViewTouchCoord)
-        if (coord != null) {
-            val circlesDistancePercentage = Math.round(Math.hypot(
-                (frontCircle.centerX - backCircle.centerX).toDouble(),
-                (frontCircle.centerY - backCircle.centerY).toDouble()
-            ) / maxPermittedDistance * 100)
-            var slopeAngle = Math.atan2(
-                -(frontCircle.centerY - backCircle.centerY).toDouble(),
-                (frontCircle.centerX - backCircle.centerX).toDouble()
-            )
-            if (slopeAngle < 0)
-                slopeAngle += 2 * Math.PI
-            slopeAngle = Math.toDegrees(slopeAngle)
 
-            // this data should be sent through bluetooth
-            coord.text = "(${circlesDistancePercentage.toInt()}, ${slopeAngle.toInt()})"
-        }
+        circlesDistancePercentage = Math.hypot(
+            (frontCircle.centerX - backCircle.centerX).toDouble(),
+            (frontCircle.centerY - backCircle.centerY).toDouble()
+        ) / maxPermittedDistance * 100
+
+        slopeAngle = Math.atan2(
+            -(frontCircle.centerY - backCircle.centerY).toDouble(),
+            (frontCircle.centerX - backCircle.centerX).toDouble()
+        )
+        if (slopeAngle < 0)
+            slopeAngle += 2 * Math.PI
+        slopeAngle = Math.toDegrees(slopeAngle)
     }
 
 }
