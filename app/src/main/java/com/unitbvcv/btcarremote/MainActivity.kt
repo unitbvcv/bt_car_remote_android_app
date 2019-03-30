@@ -6,8 +6,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
+import android.view.Surface
+import android.view.WindowManager
 import android.widget.TextView
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,8 +22,12 @@ class MainActivity : AppCompatActivity() {
         loadLayout(getScreenOrientation())
 
         bluetoothViewModel = ViewModelProviders.of(this).get(BluetoothViewModel::class.java)
+
         val joystickView = findViewById<JoystickView>(R.id.joystickView)
+
         joystickView.joystickData.observe(this, bluetoothViewModel.joystickObserver)
+
+        // this updates the text view showing the joystick coordinates
         joystickView.joystickData.observe(this, Observer { joystickPair: Pair<Double, Double>? ->
             if (joystickPair != null) {
                 findViewById<TextView>(R.id.textViewTouchCoord)?.text =
@@ -27,6 +35,12 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        processIntent()
+    }
+
+    private fun processIntent() {
+        bluetoothViewModel.refreshRate.value = intent.getIntExtra("refreshRate", 50)
+        bluetoothViewModel.timeoutCount.value = intent.getIntExtra("timeoutCount", 10)
     }
 
     private fun getScreenOrientation() : Int {
@@ -54,7 +68,8 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.settingsItem -> {
                 val intent = Intent(this, SettingsActivity::class.java).apply {
-                    // putExtra(EXTRA_MESSAGE, message)
+                    putExtra("refreshRate", bluetoothViewModel.refreshRate.value.toString())
+                    putExtra("timeoutCount", bluetoothViewModel.timeoutCount.value.toString())
                 }
                 startActivity(intent)
                 true

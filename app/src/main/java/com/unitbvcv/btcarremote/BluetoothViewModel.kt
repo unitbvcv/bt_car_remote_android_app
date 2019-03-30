@@ -23,5 +23,12 @@ class BluetoothViewModel : ViewModel() {
         it.value = ""
     }
 
+    val refreshRate: MutableLiveData<Int> = MutableLiveData<Int>().also {
+        it.value = 50
+    }
+
+    val timeoutCount: MutableLiveData<Int> = MutableLiveData<Int>().also {
+        it.value = 10
+    }
 
 }
