@@ -42,7 +42,7 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(toolbar_setings)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         settingsViewModel = ViewModelProviders.of(this).get(SettingsViewModel::class.java)

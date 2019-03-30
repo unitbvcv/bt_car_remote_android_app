@@ -6,6 +6,8 @@ import android.arch.lifecycle.ViewModel
 
 class BluetoothViewModel : ViewModel() {
 
+    // TODO: create observers for the live data, either here or in another class
+
     val joystickObserver: Observer<Pair<Double, Double>> = Observer { joystickPair: Pair<Double, Double>? ->
         // TODO: send Bluetooth data
         // or move it to a bluetooth manager
