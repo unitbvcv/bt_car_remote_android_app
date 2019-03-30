@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.unitbvcv.btcarremote">
 
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <application
             android:allowBackup="true"
@@ -13,6 +13,14 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
+        <activity android:name=".ConnectActivity"
+                  android:label="Connect to"
+                  android:parentActivityName=".SettingsActivity"
+                  android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.unitbvcv.btcarremote.SettingsActivity"/>
+        </activity>
         <activity
                 android:name=".SettingsActivity"
                 android:label="@string/title_activity_settings"
@@ -30,7 +38,5 @@
             </intent-filter>
         </activity>
     </application>
-
-
 
 </manifest>

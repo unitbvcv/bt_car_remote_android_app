@@ -56,8 +56,8 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun processIntent() {
-        settingsViewModel.refreshRate = intent.getStringExtra("refreshRate")
-        settingsViewModel.timeoutCount = intent.getStringExtra("timeoutCount")
+        settingsViewModel.refreshRate = intent.getStringExtra("refreshRate") ?: "50"
+        settingsViewModel.timeoutCount = intent.getStringExtra("timeoutCount") ?: "10"
     }
 
     private fun populateConnectListView() {
@@ -67,8 +67,11 @@ class SettingsActivity : AppCompatActivity() {
         connectListView.adapter = adapter
 
         connectListView.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
-            Toast.makeText(this, "test", Toast.LENGTH_SHORT).show()
-            // TODO: move to another activity with bluetooth device search
+            val intent = Intent(this, ConnectActivity::class.java).apply {
+                putExtra("refreshRate", settingsViewModel.refreshRate)
+                putExtra("timeoutCount", settingsViewModel.timeoutCount)
+            }
+            startActivity(intent)
         }
     }
 
