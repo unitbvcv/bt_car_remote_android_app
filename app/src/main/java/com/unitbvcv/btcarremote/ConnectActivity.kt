@@ -6,8 +6,6 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -29,6 +27,7 @@ class ConnectActivity : AppCompatActivity() {
 
     private lateinit var connectViewModel: ConnectViewModel
 
+    private var isBluetoothAdapter = false
     private lateinit var bluetoothAdapter: BluetoothAdapter
 
     private val REQUEST_ENABLE_BT: Int = 4367
@@ -44,21 +43,7 @@ class ConnectActivity : AppCompatActivity() {
 
 
     private var isActionFoundReceiverRegistered = false
-    // de scos
-    private val actionFoundReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val action: String = intent.action
-            when(action) {
-                BluetoothDevice.ACTION_FOUND -> {
-                    val device: BluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                    val list = connectViewModel.discoveredDevicesList.value?.toMutableList() ?: mutableListOf<String>()
-                    list += "${device.name} ${device.address}"
-                    connectViewModel.discoveredDevicesList.value = list
-                }
-            }
-        }
-
-    }
+    private lateinit var actionFoundReceiver: ActionFoundReceiver
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -150,14 +135,13 @@ class ConnectActivity : AppCompatActivity() {
         val btAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
         if (btAdapter != null) {
             bluetoothAdapter = btAdapter
+            isBluetoothAdapter = true
 
             createPairedViewObserver()
             createNearbyViewObserver()
 
             val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
-            //            actionFoundReceiver = ActionFoundReceiver().apply {
-            //                viewModel = connectViewModel
-            //            }
+            actionFoundReceiver = ActionFoundReceiver(connectViewModel)
             registerReceiver(actionFoundReceiver, filter)
             isActionFoundReceiverRegistered = true
 
@@ -209,7 +193,7 @@ class ConnectActivity : AppCompatActivity() {
                     if (view is TextView) {
                         connectViewModel.deviceNameToConnect = view.text.toString()
 
-                        bluetoothAdapter.cancelDiscovery()
+                        stopDiscovery()
 
                         Toast.makeText(this, connectViewModel.deviceNameToConnect, Toast.LENGTH_SHORT).show()
                     }
@@ -235,7 +219,7 @@ class ConnectActivity : AppCompatActivity() {
                         // TODO: pair and test connection maybe
                         connectViewModel.deviceNameToConnect = view.text.toString()
 
-                        bluetoothAdapter.cancelDiscovery()
+                        stopDiscovery()
 
                         Toast.makeText(this, connectViewModel.deviceNameToConnect, Toast.LENGTH_SHORT).show()
                     }
@@ -249,6 +233,12 @@ class ConnectActivity : AppCompatActivity() {
         bluetoothAdapter.startDiscovery()
     }
 
+    private fun stopDiscovery() {
+        if (isBluetoothAdapter && bluetoothAdapter.isDiscovering) {
+            bluetoothAdapter.cancelDiscovery()
+        }
+    }
+
     private fun unregisterReceivers() {
         if (isActionFoundReceiverRegistered) {
             unregisterReceiver(actionFoundReceiver)
@@ -257,6 +247,7 @@ class ConnectActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        stopDiscovery()
         unregisterReceivers()
 
         val intent = Intent(this, SettingsActivity::class.java).apply {
@@ -277,6 +268,7 @@ class ConnectActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        stopDiscovery()
         unregisterReceivers()
         super.onDestroy()
     }
