@@ -25,6 +25,9 @@ class SettingsActivity : AppCompatActivity() {
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra("refreshRate", settingsViewModel.refreshRate.toInt())
             putExtra("timeoutCount", settingsViewModel.timeoutCount.toInt())
+            if (settingsViewModel.deviceToConnectTo != null) {
+                putExtra("deviceToConnectTo", settingsViewModel.deviceToConnectTo)
+            }
         }
         startActivity(intent)
     }
@@ -58,6 +61,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun processIntent() {
         settingsViewModel.refreshRate = intent.getStringExtra("refreshRate") ?: "50"
         settingsViewModel.timeoutCount = intent.getStringExtra("timeoutCount") ?: "10"
+        settingsViewModel.deviceToConnectTo = intent.getParcelableExtra("deviceToConnectTo")
     }
 
     private fun populateConnectListView() {

@@ -12,12 +12,15 @@ class ActionFoundReceiver(private val viewModel: ConnectViewModel) : BroadcastRe
         when(action) {
             BluetoothDevice.ACTION_FOUND -> {
                 val device: BluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+
                 val list = viewModel.discoveredDevicesList.value?.toMutableList() ?: mutableListOf<String>()
                 val deviceDetails = "${device.name} ${device.address}"
                 if (list.contains(deviceDetails) == false) {
                     list += deviceDetails
                 }
                 viewModel.discoveredDevicesList.value = list
+
+                viewModel.bluetoothDevicesMap[deviceDetails] = device
             }
         }
     }

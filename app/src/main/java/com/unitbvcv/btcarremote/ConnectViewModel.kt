@@ -2,6 +2,7 @@ package com.unitbvcv.btcarremote
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
+import android.bluetooth.BluetoothDevice
 
 class ConnectViewModel: ViewModel() {
 
@@ -10,7 +11,9 @@ class ConnectViewModel: ViewModel() {
     val discoveredDevicesList: MutableLiveData<List<String>> = MutableLiveData()
 
 
-    var deviceNameToConnect: String = ""
+    var deviceToConnectTo: BluetoothDevice? = null
+
+    val bluetoothDevicesMap = mutableMapOf<String, BluetoothDevice>()
 
     var refreshRate: String = ""
     var timeoutCount: String = ""

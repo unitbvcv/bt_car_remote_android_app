@@ -3,8 +3,11 @@ package com.unitbvcv.btcarremote
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
+import android.bluetooth.BluetoothDevice
 
 class BluetoothViewModel : ViewModel() {
+
+    var deviceToConnectTo: BluetoothDevice? = null
 
     // TODO: create observers for the live data, either here or in another class
 
