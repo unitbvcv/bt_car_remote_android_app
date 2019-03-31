@@ -9,17 +9,17 @@ import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import kotlinx.android.synthetic.main.activity_connect.*
 
 
@@ -44,6 +44,12 @@ class ConnectActivity : AppCompatActivity() {
 
     private var isActionFoundReceiverRegistered = false
     private lateinit var actionFoundReceiver: ActionFoundReceiver
+
+    private var isDiscoveryStartedReceiverRegistered = false
+    private lateinit var actionDiscoveryStartedReceiver: ActionDiscoveryStartedReceiver
+
+    private var isDiscoveryFinishedReceiverRegistered = false
+    private lateinit var actionDiscoveryFinishedReceiver: ActionDiscoveryFinishedReceiver
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,7 +127,7 @@ class ConnectActivity : AppCompatActivity() {
                 when (resultCode) {
                     Activity.RESULT_OK -> {
                         populatePairedView()
-                        populateDiscoveredDevices()
+                        startDiscovery()
                     }
                     Activity.RESULT_CANCELED -> {
                         onBackPressed()
@@ -140,36 +146,27 @@ class ConnectActivity : AppCompatActivity() {
             createPairedViewObserver()
             createNearbyViewObserver()
 
-            val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
+            var filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
             actionFoundReceiver = ActionFoundReceiver(connectViewModel)
             registerReceiver(actionFoundReceiver, filter)
             isActionFoundReceiverRegistered = true
 
+            filter = IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+            actionDiscoveryStartedReceiver = ActionDiscoveryStartedReceiver()
+            registerReceiver(actionDiscoveryStartedReceiver, filter)
+            isDiscoveryStartedReceiverRegistered = true
 
-            /*
-             *
-             * un observer pe lista care sa faca adapterul pt listview si apoi onItemSelected care sa highlightuiasca
-             * si sa opreasca descoperirea si sa inchida conexiunea veche daca exista
-             * daca se face pair atunci sa se faca refresh la paired devices - sparta functia de mai sus
-             *
-             *
-             * un broadcast receiver pe DISCOREY_STARTED ca sa afiseze chestia rotativa si X-ul
-             *
-             * un broadcast receiver pe DISCOVERY_ENDED ca sa afiseze refreshul
-             *
-             * un menu.xml cu:
-             * un buton de refresh
-             * un buton de X
-             * ceva rotativ - https://stackoverflow.com/questions/5442183/using-the-animated-circle-in-an-imageview-while-loading-stuff
-             *
-             */
+            filter = IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+            actionDiscoveryFinishedReceiver = ActionDiscoveryFinishedReceiver()
+            registerReceiver(actionDiscoveryFinishedReceiver, filter)
+            isDiscoveryFinishedReceiverRegistered = true
 
             if (bluetoothAdapter.isEnabled == false) {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
             } else {
                 populatePairedView()
-                populateDiscoveredDevices()
+                startDiscovery()
             }
         }
     }
@@ -203,6 +200,9 @@ class ConnectActivity : AppCompatActivity() {
     }
 
     private fun populatePairedView() {
+        connectViewModel.pairedDevicesList.value = listOf()
+        pairedListView.adapter = ArrayAdapter<String>(this, R.layout.text_view, emptyArray())
+
         val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter.bondedDevices
         connectViewModel.pairedDevicesList.value = pairedDevices?.map { it.name + " " + it.address }
     }
@@ -216,7 +216,9 @@ class ConnectActivity : AppCompatActivity() {
 
                 nearbyListView.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
                     if (view is TextView) {
-                        // TODO: pair and test connection maybe
+                        // TODO: pair and test connection maybe (stop previous connection)
+                        // if pairing happens, maybe refresh pair view
+                        // maybe highlight selected device or just resume to a toast
                         connectViewModel.deviceNameToConnect = view.text.toString()
 
                         stopDiscovery()
@@ -229,7 +231,11 @@ class ConnectActivity : AppCompatActivity() {
         })
     }
 
-    private fun populateDiscoveredDevices() {
+    private fun startDiscovery() {
+        // TODO: de oprit vreo conexiune existenta
+        connectViewModel.discoveredDevicesList.value = listOf()
+        nearbyListView.adapter = ArrayAdapter<String>(this, R.layout.text_view, emptyArray())
+
         bluetoothAdapter.startDiscovery()
     }
 
@@ -244,6 +250,14 @@ class ConnectActivity : AppCompatActivity() {
             unregisterReceiver(actionFoundReceiver)
             isActionFoundReceiverRegistered = false
         }
+        if (isDiscoveryStartedReceiverRegistered) {
+            unregisterReceiver(actionDiscoveryStartedReceiver)
+            isDiscoveryStartedReceiverRegistered = false
+        }
+        if (isDiscoveryFinishedReceiverRegistered) {
+            unregisterReceiver(actionDiscoveryFinishedReceiver)
+            isDiscoveryFinishedReceiverRegistered = false
+        }
     }
 
     override fun onBackPressed() {
@@ -257,10 +271,35 @@ class ConnectActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.connect_activity_menu, menu)
+
+        menu?.findItem(R.id.refreshDiscoveryItem)?.isVisible = false
+
+        val view = menu?.findItem(R.id.loadingDiscoveryItem)?.actionView
+        if (view != null && view is ProgressBar) {
+            view.indeterminateDrawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
+        }
+
+        actionDiscoveryStartedReceiver.menu = menu
+        actionDiscoveryFinishedReceiver.menu = menu
+
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item?.itemId) {
             android.R.id.home -> {
                 onBackPressed()
+                true
+            }
+            R.id.refreshDiscoveryItem -> {
+                populatePairedView()
+                startDiscovery()
+                true
+            }
+            R.id.stopDiscoveryItem -> {
+                stopDiscovery()
                 true
             }
             else -> super.onOptionsItemSelected(item)

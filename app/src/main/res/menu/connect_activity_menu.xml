@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/refreshDiscoveryItem"
+          android:title=""
+          android:orderInCategory="101"
+          app:showAsAction="always"
+          android:icon="@drawable/ic_refresh_white_40dp"
+    />
+
+
+    <item android:id="@+id/loadingDiscoveryItem"
+          android:title=""
+          android:orderInCategory="102"
+          app:showAsAction="always"
+          app:actionViewClass="android.widget.ProgressBar"
+    />
+    <!-- app:actionLayout="@layout/progress_bar" -->
+
+    <item android:id="@+id/stopDiscoveryItem"
+          android:title=""
+          android:orderInCategory="103"
+          app:showAsAction="always"
+          android:icon="@drawable/ic_close_white_40dp"
+    />
+
+
+</menu>
