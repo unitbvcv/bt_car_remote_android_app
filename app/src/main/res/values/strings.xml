@@ -10,4 +10,7 @@
     <string name="about">About</string>
     <string name="bluetooth_settings">Bluetooth Settings</string>
     <string name="_0_0">(0, 0)</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="paired_devices">Paired devices</string>
+    <string name="nearby_devices">Nearby devices</string>
 </resources>

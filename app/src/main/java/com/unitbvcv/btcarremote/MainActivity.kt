@@ -1,19 +1,54 @@
 package com.unitbvcv.btcarremote
 
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
-import android.support.v7.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
+import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.Surface
 import android.view.WindowManager
+import android.widget.TextView
+import android.widget.Toast
+
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var bluetoothViewModel: BluetoothViewModel
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         loadLayout(getScreenOrientation())
+
+        bluetoothViewModel = ViewModelProviders.of(this).get(BluetoothViewModel::class.java)
+
+        val joystickView = findViewById<JoystickView>(R.id.joystickView)
+
+        joystickView.joystickData.observe(this, bluetoothViewModel.joystickObserver)
+
+        // this updates the text view showing the joystick coordinates
+        joystickView.joystickData.observe(this, Observer { joystickPair: Pair<Double, Double>? ->
+            if (joystickPair != null) {
+                findViewById<TextView>(R.id.textViewTouchCoord)?.text =
+                    "(${joystickPair.first.toInt()}, ${joystickPair.second.toInt()})"
+            }
+        })
+
+        processIntent()
+    }
+
+    private fun processIntent() {
+        bluetoothViewModel.refreshRate.value = intent.getIntExtra("refreshRate", 50)
+        bluetoothViewModel.timeoutCount.value = intent.getIntExtra("timeoutCount", 10)
+        bluetoothViewModel.deviceToConnectTo = intent.getParcelableExtra("deviceToConnectTo")
+
+        if (bluetoothViewModel.deviceToConnectTo != null) {
+            // TODO: remove later
+            Toast.makeText(this, bluetoothViewModel.deviceToConnectTo?.name ?: "failed :(", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun getScreenOrientation() : Int {
@@ -33,25 +68,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu, menu)
+        menuInflater.inflate(R.menu.main_activity_menu, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle item selection
         return when (item.itemId) {
-            R.id.connectAction -> {
-                ConnectDialog(this).show()
+            R.id.settingsItem -> {
+                val intent = Intent(this, SettingsActivity::class.java).apply {
+                    putExtra("refreshRate", bluetoothViewModel.refreshRate.value.toString())
+                    putExtra("timeoutCount", bluetoothViewModel.timeoutCount.value.toString())
+                    if (bluetoothViewModel.deviceToConnectTo != null) {
+                        putExtra("deviceToConnectTo", bluetoothViewModel.deviceToConnectTo)
+                    }
+                }
+                startActivity(intent)
                 true
             }
-            R.id.bluetoothSettingsAction -> {
-                BTSettingsDialog(this).show()
-                true
-            }
-            R.id.aboutAction -> {
-                AboutDialog(this).show()
-                true
-            }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
