@@ -6,13 +6,13 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.support.annotation.RequiresApi
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
@@ -51,6 +51,19 @@ class ConnectActivity : AppCompatActivity() {
     private var isDiscoveryFinishedReceiverRegistered = false
     private lateinit var actionDiscoveryFinishedReceiver: ActionDiscoveryFinishedReceiver
 
+    private var bluetoothService: BluetoothService? = null
+    private var isServiceBound = false
+    private var serviceConnection = object: ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            if (service is BluetoothServiceBinder) {
+                bluetoothService = service.service
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            bluetoothService = null
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,12 +76,14 @@ class ConnectActivity : AppCompatActivity() {
         processIntent()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (extraCheckPermissions()) {
-                initializeBluetooth()
+            if (!extraCheckPermissions()) {
+                return
             }
-        } else {
-            initializeBluetooth()
         }
+
+        initializeBluetooth()
+
+        doBindService()
     }
 
     private fun processIntent() {
@@ -172,6 +187,18 @@ class ConnectActivity : AppCompatActivity() {
         }
     }
 
+    private fun doBindService() {
+        isServiceBound = bindService(Intent(this, BluetoothService::class.java),
+                serviceConnection, Context.BIND_IMPORTANT)
+    }
+
+    private fun doUnbindService() {
+        if (isServiceBound) {
+            unbindService(serviceConnection)
+            isServiceBound = false
+        }
+    }
+
     private fun createPairedViewObserver() {
         connectViewModel.pairedDevicesList.observe(this, Observer { pairedDevicesList: List<String>? ->
             if (pairedDevicesList == null || pairedDevicesList.isEmpty()) {
@@ -224,6 +251,8 @@ class ConnectActivity : AppCompatActivity() {
                         connectViewModel.deviceToConnectTo = connectViewModel.bluetoothDevicesMap[view.text.toString()]
 
                         stopDiscovery()
+
+                        bluetoothService?.openConnection()
 
                         Toast.makeText(this, view.text.toString(), Toast.LENGTH_SHORT).show()
                     }
@@ -316,7 +345,10 @@ class ConnectActivity : AppCompatActivity() {
     override fun onDestroy() {
         stopDiscovery()
         unregisterReceivers()
+        doUnbindService()
+
         super.onDestroy()
     }
+
 
 }
