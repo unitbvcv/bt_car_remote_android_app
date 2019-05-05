@@ -131,6 +131,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/guidelinevertical60"
                 app:layout_constraintBottom_toBottomOf="parent"
+                android:maxLength="32"
         />
 
         <Button
