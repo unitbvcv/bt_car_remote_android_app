@@ -47,7 +47,7 @@ class BluetoothViewModel : ViewModel() {
         val angle = joystickPair.second
 
         val alpha = 45.0
-        val signFlag: Byte = 0x10000000.toByte()
+        val signFlag: Byte = 0b10000000.toByte()
 
         if (angle in 0.0..90.0) {
             // First quadrant
@@ -76,7 +76,7 @@ class BluetoothViewModel : ViewModel() {
     private fun toMotorValuesFirstQuadrant(percentage: Double, angle: Double, alpha: Double): Pair<Byte, Byte> {
 
         val middleDelta = 2.0
-        val signFlag: Byte = 0x10000000.toByte()
+        val signFlag: Byte = 0b10000000.toByte()
 
         if (angle >= 0) {
             if (angle <= 5.0) {

@@ -106,6 +106,10 @@ class JoystickView(context: Context, attrs: AttributeSet) : View(context, attrs)
             (frontCircle.centerY - backCircle.centerY).toDouble()
         ) / maxPermittedDistance * 100
 
+        if (circlesDistancePercentage > 99) {
+            circlesDistancePercentage = 99.0
+        }
+
         slopeAngle = Math.atan2(
             -(frontCircle.centerY - backCircle.centerY).toDouble(),
             (frontCircle.centerX - backCircle.centerX).toDouble()
