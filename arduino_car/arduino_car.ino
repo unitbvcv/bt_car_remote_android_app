@@ -32,7 +32,7 @@ const byte TRA_TYPE_SPEAKER = 22;
 // Motor
 const byte MOTOR_MIN_SPEED = 50;
 const byte MOTOR_MAX_SPEED = 255;
-const byte MOTOR_DIFF_SPEED_DIV_100 = (MOTOR_MAX_SPEED - MOTOR_MIN_SPEED) / 100;
+const float MOTOR_DIFF_SPEED_DIV_100 = (MOTOR_MAX_SPEED - MOTOR_MIN_SPEED) / 100;
 
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_ENABLE, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 SoftwareSerial bt(PIN_BT_RX, PIN_BT_TX);
@@ -97,7 +97,7 @@ void loop() {
 
       if (!errorOnReceive)
       {
-        processReceivedBytes(currentByte - 1);
+        processReceivedBytes(currentByte + 1);
       }
     }
   }
