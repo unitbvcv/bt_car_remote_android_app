@@ -67,6 +67,7 @@ void setup() {
   pinMode(PIN_MOTOR_LEFT_FWD, OUTPUT);
   pinMode(PIN_MOTOR_RIGHT_BWD, OUTPUT);
   pinMode(PIN_MOTOR_RIGHT_FWD, OUTPUT);
+  engageMotors(0, 0);
 }
 
 void loop() {
@@ -146,6 +147,7 @@ void processLEDTransmission(byte numberOfBytesReceived)
 {
   if (numberOfBytesReceived == 4)
   {
+    digitalWrite(PIN_LED, (bytesReceived[2] == 0 : LOW ? HIGH));
   }
 }
 
