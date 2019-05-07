@@ -55,13 +55,15 @@ class ConnectActivity : AppCompatActivity() {
     private var isServiceBound = false
     private var serviceConnection = object: ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            if (service is BluetoothServiceBinder) {
-                bluetoothService = service.service
+            if (service is BluetoothService.BluetoothServiceBinder) {
+                bluetoothService = service.getService()
+                isServiceBound = true
             }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             bluetoothService = null
+            isServiceBound = false
         }
     }
 
@@ -80,9 +82,11 @@ class ConnectActivity : AppCompatActivity() {
                 return
             }
         }
+    }
 
+    override fun onStart() {
+        super.onStart()
         initializeBluetooth()
-
         doBindService()
     }
 
@@ -188,8 +192,9 @@ class ConnectActivity : AppCompatActivity() {
     }
 
     private fun doBindService() {
-        isServiceBound = bindService(Intent(this, BluetoothService::class.java),
-                serviceConnection, Context.BIND_IMPORTANT)
+        val intent = Intent(this, BluetoothService::class.java)
+        startService(intent)
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
     private fun doUnbindService() {
@@ -222,6 +227,7 @@ class ConnectActivity : AppCompatActivity() {
                         stopDiscovery()
 
                         Toast.makeText(this, view.text.toString(), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, bluetoothService?.getCurrentTime(), Toast.LENGTH_SHORT).show()
                     }
                 }
             }
