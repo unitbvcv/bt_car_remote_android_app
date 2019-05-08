@@ -147,7 +147,7 @@ void processLEDTransmission(byte numberOfBytesReceived)
 {
   if (numberOfBytesReceived == 4)
   {
-    digitalWrite(PIN_LED, (bytesReceived[2] == 0 : LOW ? HIGH));
+    digitalWrite(PIN_LED, (bytesReceived[2] == 0 ? LOW : HIGH));
   }
 }
 
@@ -155,10 +155,24 @@ void processJoystickTransmission(byte numberOfBytesReceived)
 {
   if (numberOfBytesReceived == 5)
   {
-    if (bytesReceived[2] <= 200 && bytesReceived[3] <= 200)
+    int speedLeft = bytesReceived[2];
+    int speedRight = bytesReceived[3];
+    
+    if (bytesReceived[2] & 0b10000000 != 0)
     {
-      engageMotors(bytesReceived[2] - 100, bytesReceived[3] - 100);
+      bytesReceived[2] = bytesReceived[2] ^ 0b10000000;
+      speedLeft = bytesReceived[2];
+      speedLeft = -speedLeft;
     }
+
+    if (bytesReceived[3] & 0b10000000 != 0)
+    {
+      bytesReceived[3] = bytesReceived[3] ^ 0b10000000;
+      speedRight = bytesReceived[3];
+      speedRight = -speedRight;
+    }
+    
+    engageMotors(speedLeft, speedRight);
   }
 }
 
