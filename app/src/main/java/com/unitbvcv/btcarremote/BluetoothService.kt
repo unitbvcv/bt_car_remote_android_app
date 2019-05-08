@@ -13,12 +13,12 @@ import java.util.*
 class BluetoothService : Service() {
     private val binder = BluetoothServiceBinder()
     private val BLUETOOTH_SERIAL_BOARD_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
-    private val TRA_END = 3
-    private val TRA_START = 2
-    private val TRA_TYPE_LCD = 24
-    private val TRA_TYPE_LED = 21
-    private val TRA_TYPE_JOYSTICK = 23
-    private val TRA_TYPE_SPEAKER = 22
+    private val TRA_END: Byte = 3
+    private val TRA_START: Byte = 2
+    private val TRA_TYPE_LCD: Byte = 24
+    private val TRA_TYPE_LED: Byte = 21
+    private val TRA_TYPE_JOYSTICK: Byte = 23
+    private val TRA_TYPE_SPEAKER: Byte = 22
     private var deviceToConnectTo: BluetoothDevice? = null
     private var bluetoothSocket: BluetoothSocket? = null
 
@@ -59,11 +59,7 @@ class BluetoothService : Service() {
     }
 
     fun sendJoystickData(data: Pair<Byte, Byte>) {
-        bluetoothSocket?.outputStream?.write(TRA_START)
-        bluetoothSocket?.outputStream?.write(TRA_TYPE_JOYSTICK)
-        bluetoothSocket?.outputStream?.write(data.first.toInt())
-        bluetoothSocket?.outputStream?.write(data.second.toInt())
-        bluetoothSocket?.outputStream?.write(TRA_END)
+        bluetoothSocket?.outputStream?.write(byteArrayOf(TRA_START, TRA_TYPE_JOYSTICK, data.first, data.second, TRA_END))
     }
 
     inner class BluetoothServiceBinder: Binder() {

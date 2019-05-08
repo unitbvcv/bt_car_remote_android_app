@@ -27,7 +27,6 @@ class ConnectActivity : AppCompatActivity() {
 
     private lateinit var connectViewModel: ConnectViewModel
 
-    private var isBluetoothAdapter = false
     private lateinit var bluetoothAdapter: BluetoothAdapter
 
     private val REQUEST_ENABLE_BT: Int = 4367
@@ -161,7 +160,6 @@ class ConnectActivity : AppCompatActivity() {
         val btAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
         if (btAdapter != null) {
             bluetoothAdapter = btAdapter
-            isBluetoothAdapter = true
 
             createPairedViewObserver()
             createNearbyViewObserver()
@@ -276,7 +274,7 @@ class ConnectActivity : AppCompatActivity() {
     }
 
     private fun stopDiscovery() {
-        if (isBluetoothAdapter && bluetoothAdapter.isDiscovering) {
+        if (bluetoothAdapter.isDiscovering) {
             bluetoothAdapter.cancelDiscovery()
         }
     }

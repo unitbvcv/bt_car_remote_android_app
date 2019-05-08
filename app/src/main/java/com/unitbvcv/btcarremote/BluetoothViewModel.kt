@@ -9,7 +9,7 @@ import java.lang.ref.WeakReference
 import kotlin.experimental.or
 
 class BluetoothViewModel : ViewModel() {
-    val bluetoothService: WeakReference<BluetoothService?> = WeakReference(null)
+    var bluetoothService: WeakReference<BluetoothService?> = WeakReference(null)
 
     // TODO: create observers for the live data, either here or in another class
 

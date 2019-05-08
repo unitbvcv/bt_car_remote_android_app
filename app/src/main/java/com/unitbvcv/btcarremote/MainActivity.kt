@@ -2,9 +2,12 @@ package com.unitbvcv.btcarremote
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
@@ -12,16 +15,40 @@ import android.view.Surface
 import android.view.WindowManager
 import android.widget.TextView
 import android.widget.Toast
+import java.lang.ref.WeakReference
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var bluetoothViewModel: BluetoothViewModel
+    private var bluetoothService: BluetoothService? = null
+    private var isServiceBound = false
+    private var serviceConnection = object: ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            if (service is BluetoothService.BluetoothServiceBinder) {
+                bluetoothService = service.getService()
+                isServiceBound = true
+                bluetoothViewModel.bluetoothService = WeakReference(bluetoothService)
+            }
+        }
 
+        override fun onServiceDisconnected(name: ComponentName?) {
+            bluetoothService = null
+            isServiceBound = false
+        }
+    }
+
+    private fun doBindService() {
+        val intent = Intent(this, BluetoothService::class.java)
+        startService(intent)
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         loadLayout(getScreenOrientation())
+
+        doBindService()
 
         bluetoothViewModel = ViewModelProviders.of(this).get(BluetoothViewModel::class.java)
 
