@@ -4,19 +4,19 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
 import android.bluetooth.BluetoothDevice
+import android.content.Intent
+import java.lang.ref.WeakReference
 import kotlin.experimental.or
 
 class BluetoothViewModel : ViewModel() {
-
-    var deviceToConnectTo: BluetoothDevice? = null
+    val bluetoothService: WeakReference<BluetoothService?> = WeakReference(null)
 
     // TODO: create observers for the live data, either here or in another class
 
     val joystickObserver: Observer<Pair<Double, Double>> = Observer { joystickPair: Pair<Double, Double>? ->
-        // TODO: send Bluetooth data
-        // or move it to a bluetooth manager
         if (joystickPair != null) {
             val motorValues = toMotorValues(joystickPair)
+            bluetoothService.get()?.sendJoystickData(motorValues)
         }
     }
 

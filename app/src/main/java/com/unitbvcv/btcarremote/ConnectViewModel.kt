@@ -10,9 +10,6 @@ class ConnectViewModel: ViewModel() {
 
     val discoveredDevicesList: MutableLiveData<List<String>> = MutableLiveData()
 
-
-    var deviceToConnectTo: BluetoothDevice? = null
-
     val bluetoothDevicesMap = mutableMapOf<String, BluetoothDevice>()
 
     var refreshRate: String = ""

@@ -43,12 +43,6 @@ class MainActivity : AppCompatActivity() {
     private fun processIntent() {
         bluetoothViewModel.refreshRate.value = intent.getIntExtra("refreshRate", 50)
         bluetoothViewModel.timeoutCount.value = intent.getIntExtra("timeoutCount", 10)
-        bluetoothViewModel.deviceToConnectTo = intent.getParcelableExtra("deviceToConnectTo")
-
-        if (bluetoothViewModel.deviceToConnectTo != null) {
-            // TODO: remove later
-            Toast.makeText(this, bluetoothViewModel.deviceToConnectTo?.name ?: "failed :(", Toast.LENGTH_SHORT).show()
-        }
     }
 
     private fun getScreenOrientation() : Int {
@@ -78,9 +72,6 @@ class MainActivity : AppCompatActivity() {
                 val intent = Intent(this, SettingsActivity::class.java).apply {
                     putExtra("refreshRate", bluetoothViewModel.refreshRate.value.toString())
                     putExtra("timeoutCount", bluetoothViewModel.timeoutCount.value.toString())
-                    if (bluetoothViewModel.deviceToConnectTo != null) {
-                        putExtra("deviceToConnectTo", bluetoothViewModel.deviceToConnectTo)
-                    }
                 }
                 startActivity(intent)
                 true

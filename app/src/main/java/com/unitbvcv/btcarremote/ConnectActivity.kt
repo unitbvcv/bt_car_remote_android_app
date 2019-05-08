@@ -41,6 +41,7 @@ class ConnectActivity : AppCompatActivity() {
     private val REQUEST_BLUETOOTH_ADMIN = 4306
     private var isBluetoothAdminPermitted = false
 
+    private val REQUEST_BT_SETTINGS = 4311
 
     private var isActionFoundReceiverRegistered = false
     private lateinit var actionFoundReceiver: ActionFoundReceiver
@@ -93,7 +94,6 @@ class ConnectActivity : AppCompatActivity() {
     private fun processIntent() {
         connectViewModel.refreshRate = intent.getStringExtra("refreshRate") ?: "50"
         connectViewModel.timeoutCount = intent.getStringExtra("timeoutCount") ?: "10"
-        connectViewModel.deviceToConnectTo = intent.getParcelableExtra("deviceToConnectTo")
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -218,16 +218,16 @@ class ConnectActivity : AppCompatActivity() {
                 pairedListView.adapter = adapter
 
                 pairedListView.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
-                    // TODO: test connection maybe?
                     if (view is TextView) {
-                        connectViewModel.deviceToConnectTo = bluetoothAdapter.bondedDevices.find {
+                        val deviceToConnectTo = bluetoothAdapter.bondedDevices.find {
                             "${it.name} ${it.address}" == view.text.toString()
                         }
 
                         stopDiscovery()
 
-                        Toast.makeText(this, view.text.toString(), Toast.LENGTH_SHORT).show()
-                        Toast.makeText(this, bluetoothService?.getCurrentTime(), Toast.LENGTH_SHORT).show()
+                        if (deviceToConnectTo != null) {
+                            bluetoothService?.connectToBluetoothDevice(deviceToConnectTo)
+                        }
                     }
                 }
             }
@@ -251,16 +251,13 @@ class ConnectActivity : AppCompatActivity() {
 
                 nearbyListView.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
                     if (view is TextView) {
-                        // TODO: pair and test connection maybe (stop previous connection)
-                        // if pairing happens, maybe refresh pair view
-                        // maybe highlight selected device or just resume to a toast
-                        connectViewModel.deviceToConnectTo = connectViewModel.bluetoothDevicesMap[view.text.toString()]
-
-                        stopDiscovery()
-
-                        bluetoothService?.openConnection()
-
-                        Toast.makeText(this, view.text.toString(), Toast.LENGTH_SHORT).show()
+                        // TODO: pairing dialog (below it shows but it doesn't add the device to the paired list)
+//                        val pairingIntent = Intent(BluetoothDevice.ACTION_PAIRING_REQUEST)
+//                        pairingIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, deviceToConnectTo)
+//                        pairingIntent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT, BluetoothDevice.PAIRING_VARIANT_PIN)
+//                        pairingIntent.putExtra(BluetoothDevice.EXTRA_PAIRING_KEY, 1234)
+//                        startActivityForResult(pairingIntent, REQUEST_BT_SETTINGS)
+                        Toast.makeText(this, "Please pair with this device in your phone's Bluetooth menu before connecting", Toast.LENGTH_SHORT).show()
                     }
                 }
 
@@ -306,9 +303,6 @@ class ConnectActivity : AppCompatActivity() {
         val intent = Intent(this, SettingsActivity::class.java).apply {
             putExtra("refreshRate", connectViewModel.refreshRate)
             putExtra("timeoutCount", connectViewModel.timeoutCount)
-            if (connectViewModel.deviceToConnectTo != null) {
-                putExtra("deviceToConnectTo", connectViewModel.deviceToConnectTo)
-            }
         }
         startActivity(intent)
     }
