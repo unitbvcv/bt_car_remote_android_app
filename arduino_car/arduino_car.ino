@@ -68,11 +68,14 @@ void setup() {
   pinMode(PIN_MOTOR_RIGHT_BWD, OUTPUT);
   pinMode(PIN_MOTOR_RIGHT_FWD, OUTPUT);
   engageMotors(0, 0);
+
+  Serial.begin(9600);
 }
 
 void loop() {
   if (bt.available())
   {
+    delay(5);
     errorOnReceive = false;
     bytesReceived[0] = bt.read();
 
@@ -81,6 +84,7 @@ void loop() {
       byte currentByte = 1;
       while (bt.available())
       {
+        delay(2);
         bytesReceived[currentByte] = bt.read();
 
         if (currentByte == TRA_MAX_LENGTH)
@@ -184,9 +188,14 @@ void processSpeakerTransmission(byte numberOfBytesReceived)
   }
 }
 
-void engageMotors(byte speedLeftPercentage, byte speedRightPercentage)
+void engageMotors(int speedLeftPercentage, int speedRightPercentage)
 {
   // Percentages between -100 and 100
+
+  Serial.print("Left: ");
+  Serial.print(speedLeftPercentage);
+  Serial.print(" right: ");
+  Serial.println(speedRightPercentage);
   
   if (speedLeftPercentage == 0)
   {
